@@ -1,4 +1,5 @@
 defmodule Aoc do
+  require IEx
   def drawn_numbers do
     {:ok, file_contents } = File.read("input_day_04.txt")
     String.split(file_contents, "\n", trim: true)
@@ -43,19 +44,15 @@ defmodule Aoc do
     end)
   end
 
-  def round([ finished_board ], _i) do
-    finished_board
-  end
-
   def round(boards, i) do
     drawn_number = Enum.at(drawn_numbers(), i)
     new_boards = Enum.map(boards, fn board -> mark_fields(board, drawn_number) end)
-    winning_boards = Enum.filter(new_boards, fn board -> has_complete_column(board) || has_complete_row(board) end)
+    remaining_boards = Enum.filter(new_boards, fn board -> !has_complete_column(board) && !has_complete_row(board) end)
 
-    if winning_boards == [] do
-      round(new_boards, i + 1)
+    if Enum.count(remaining_boards) == 0 do
+      %{ board: Enum.at(new_boards, 0), number: Enum.at(drawn_numbers(), i) }
     else
-      %{ board: Enum.at(winning_boards, 0), number: drawn_number }
+      round(remaining_boards, i + 1)
     end
   end
 
@@ -67,6 +64,7 @@ defmodule Aoc do
 
   def task do
     %{ board: board, number: number } = round(boards, 0)
+    IO.inspect %{ board: board, number: number }
     number * value(board)
   end
 end
