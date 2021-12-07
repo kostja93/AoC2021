@@ -27,13 +27,18 @@ defmodule HydrothermalVents do
     Enum.map(x1..x2, fn x -> { x, y1 } end)
   end
 
-  def line_extrapolation(_line) do
-    []
+  def line_extrapolation({ {x1, y1}, {x2, y2} }) do
+    positive_difference = trunc :math.sqrt((x1 - x2) * (x1 - x2))
+    Enum.map(0..positive_difference, fn i ->
+      {
+        Enum.at(x1..x2, i),
+        Enum.at(y1..y2, i)
+      }
+    end)
   end
 
   def count_overlaps do
-    filter(lines)
-    |> Enum.flat_map(&HydrothermalVents.line_extrapolation/1)
+    Enum.flat_map(lines, &HydrothermalVents.line_extrapolation/1)
     |> Enum.group_by(fn x -> x end)
     |> Map.values
     |> Enum.filter(fn points -> Enum.count(points) >= 2 end)
